@@ -19,6 +19,7 @@ std::string cprint(std::string text, int foreground, bool newLine);
 std::string cprint(std::string text, int foreground, int background, bool newLine);
 int resultIndex(std::vector<std::string> arr, std::string k);
 std::string charfix(std::string in, int chars);
+void printcaret(int before_color, int after_color, bool head = false);
 
 namespace ANSI {
 	int foreground(int foreground);
@@ -27,5 +28,20 @@ namespace ANSI {
 }
 
 std::vector<std::string> parse(std::string input);
+
+
+#ifdef __unix__
+unsigned long get_mem_total();
+unsigned long get_mem_free();
+unsigned long get_buffer_mem();
+unsigned long get_swap_mem_total();
+unsigned long get_swap_mem_free();
+unsigned long get_cached_mem();
+#endif
+
+#ifdef _WIN32
+#include <Windows.h>
+LPWSTR ConvertString(const std::string& instr);
+#endif
 
 #endif

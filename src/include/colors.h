@@ -9,9 +9,9 @@ const int yellow = 3;
 const int blue = 4;
 const int purple = 5;
 const int cyan = 6;
-const int dark_gray = 7;
+const int gray = 7;
 
-const int gray = 60;
+const int dark_gray = 60;
 const int bright_red = 61;
 const int bright_green = 62;
 const int bright_yellow = 63;

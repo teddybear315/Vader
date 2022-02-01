@@ -7,3 +7,10 @@ Commands:
     ☐ rename
     ☐ version
     ☐ color
+    ☐ sysinfo
+        ☐ mem
+        - get total & free mem
+        ☐ cpu
+        - get cpu name, speed
+        ☐ mb/motherboard
+        - get motherboard info

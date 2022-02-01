@@ -4,7 +4,7 @@
 
 # Compiler settings - Can be customized.
 CC = g++
-CXXFLAGS = -std=c++11 -Wall -O3
+CXXFLAGS = -std=c++11 -Wall -g #-O3 
 LDFLAGS = 
 
 # Makefile settings - Can be customized.
@@ -24,6 +24,7 @@ DELOBJ = $(OBJ)
 DEL = del
 EXE = .exe
 WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
+WDELDEP = $(OBJ:$(OBJDIR)/%.o=$(OBJDIR)\\%.d)
 
 ########################################################################
 ####################### Targets beginning here #########################
@@ -50,7 +51,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
 # Cleans complete project
 .PHONY: clean
 clean:
-	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
+	$(RM) $(DELOBJ) $(DEP)
 
 # Cleans only all files with the extension .d
 .PHONY: cleandep
@@ -61,7 +62,7 @@ cleandep:
 # Cleans complete project
 .PHONY: cleanw
 cleanw:
-	$(DEL) $(WDELOBJ) $(DEP) $(APPNAME)$(EXE)
+	$(DEL) $(WDELOBJ) $(WDELDEP)
 
 # Cleans only all files with the extension .d
 .PHONY: cleandepw
