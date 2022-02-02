@@ -6,7 +6,7 @@
 #include <ctime>
 #include <sstream>
 
-int main() {
+int main(int argc, char** argv) {
     bool running = true;
     std::string input, cwd;
     const int color_palettes[8][4] = { // light, dark
@@ -20,10 +20,31 @@ int main() {
         { gray, dark_gray, black, white }
     };
     int colors[4];
-    colors[0] = color_palettes[7][0];
-    colors[1] = color_palettes[7][1];
-    colors[2] = color_palettes[7][2];
-    colors[3] = color_palettes[7][3];
+
+    int c = std::stoi(argv[1]);
+    if (argc > 2) {
+        error("Usage: vader <color (0-7)>");
+    } else {
+        try {
+            if (c > -1 && c < 8) {
+                colors[0] = color_palettes[c][0];
+                colors[1] = color_palettes[c][1];
+                colors[2] = color_palettes[c][2];
+                colors[3] = color_palettes[c][3];
+            } else {
+                error("Usage: color <int (0-7)>");
+            }
+        } catch (const std::exception& e) {
+            error("Usage: color <int (0-7)>");
+        }
+    }
+
+    if (!(c > -1 && c < 8)) {
+        colors[0] = color_palettes[7][0];
+        colors[1] = color_palettes[7][1];
+        colors[2] = color_palettes[7][2];
+        colors[3] = color_palettes[7][3];
+    }
 
     VADER::API api;
 
@@ -65,7 +86,7 @@ int main() {
             if (args[0] == "exit") running = false;
             else if (args[0] == "color") {
                 if (args.size() != 2) {
-                    error("Usage: color " + api.builtin_man[api.COLOR]);
+                    error("Usage: color <int (0-7)>");
                 } else {
                     try {
                         int c = std::stoi(args[1]);
@@ -75,10 +96,10 @@ int main() {
                             colors[2] = color_palettes[c][2];
                             colors[3] = color_palettes[c][3];
                         } else {
-                            error("Usage: color " + api.builtin_man[api.COLOR]);
+                            error("Usage: color <int (0-7)>");
                         }
                     } catch (const std::exception& e) {
-                        error("Usage: color " + api.builtin_man[api.COLOR]);
+                        error("Usage: color <int (0-7)>");
                     }
                 }
             }
