@@ -29,7 +29,7 @@ std::string API::MINOR = "1";
 std::string API::PATCH = "0";
 std::string API::VERSION = "v" + API::MAJOR + "." + API::MINOR + "." + API::PATCH;
 
-const std::string API::builtin_list[9] = {
+const std::string API::builtin_list[API::builtins] = {
 	"cd",
 	"ls",
 	"echo",
@@ -38,9 +38,10 @@ const std::string API::builtin_list[9] = {
 	"ruler",
 	"clear",
 	"welcome",
-	"info" };
+	"info",
+	"version"};
 
-const std::string API::builtin_man[9] = {
+const std::string API::builtin_man[API::builtins] = {
 	"<path/directory...>",
 	"[path/directory...]",
 	"<string>",
@@ -49,9 +50,10 @@ const std::string API::builtin_man[9] = {
 	"",
 	"",
 	"",
-	"<type>" };
+	"<type>",
+	"" };
 
-const std::string API::builtin_desc[9] = {
+const std::string API::builtin_desc[API::builtins] = {
 	"Changes directory",
 	"List files and subdirectories",
 	"Prints input string",
@@ -60,9 +62,10 @@ const std::string API::builtin_desc[9] = {
 	"Shows a screen ruler, used for resizing to 80x25",
 	"Clears the screen",
 	"Shows the welcome message",
-	"Gives information about the system" };
+	"Gives information about the system",
+	"Shows Vader\'s current version" };
 
-int (*API::builtin_funcs[9])(std::vector<std::string>, std::string& cwd) = {
+int (*API::builtin_funcs[API::builtins])(std::vector<std::string>, std::string& cwd) = {
 	&API::cd,
 	&API::ls,
 	&API::echo,
@@ -72,9 +75,18 @@ int (*API::builtin_funcs[9])(std::vector<std::string>, std::string& cwd) = {
 	&API::_clear,
 	&API::_welcome,
 	&API::info,
+	&API::version,
 };
 
-API::API() {}
+API::API() {
+	#ifdef __apple__
+	icon = "";
+	#elif defined _WIN32
+	icon = "";
+	#elif defined __unix__
+	icon = "";
+	#endif
+}
 
 API::~API() {}
 
@@ -184,18 +196,19 @@ int API::echo(std::vector<std::string> args, std::string& cwd) {
 	return EXIT_SUCCESS;
 }
 
-static void list_directory(const char* dirname) {
+static void list_directory(std::string dirname, bool showHidden) {
 	/* Open directory stream */
-	DIR* dir = opendir(dirname);
-	if (!dir) {
-		/* Could not open directory */
-		fprintf(stderr, "Cannot open %s (%s)\n", dirname, strerror(errno));
+	DIR* dir;
+	try {
+		dir = opendir(dirname.c_str());
+	} catch(const std::exception& e) {
+		error("Cannot open "+dirname+" ("+e.what()+")");
 	}
 
 	struct dirent* ent;
 	int max_size = 0;
 	while ((ent = readdir(dir)) != NULL) {
-		int namelen;
+		int namelen = 0;
 #ifdef _WIN32
 		namelen = ent->d_namlen;
 #else
@@ -203,11 +216,11 @@ static void list_directory(const char* dirname) {
 			namelen++;
 		}
 #endif
-		if (namelen + 1 > max_size) max_size = namelen + 1;
+		if (namelen + 1 > max_size && ((ent->d_name[0] == '.' && showHidden) || (ent->d_name[0] != '.'))) max_size = namelen + 1;
 	}
 
 	closedir(dir);
-	dir = opendir(dirname);
+	dir = opendir(dirname.c_str());
 
 	/* Print all files and directories within the directory */
 	int _ = 0;
@@ -229,30 +242,38 @@ static void list_directory(const char* dirname) {
 		default:
 			color = blue;
 		}
-		cprint(charfix(ent->d_name, max_size), color);
-		if ((_ + max_size) >= 80) {
-			print();
-			_ = 0;
-		} else _ += max_size;
+		if ((ent->d_name[0] == '.' && showHidden) || (ent->d_name[0] != '.')) {
+			cprint(charfix(ent->d_name, max_size), color);
+			if ((_ + max_size) >= 80) {
+				print();
+				_ = 0;
+			} else _ += max_size;
+		}
 	}
 	print();
 
 	closedir(dir);
 }
 
-int API::ls(std::vector<std::string> args, std::string& cwd)
-{
+int API::ls(std::vector<std::string> args, std::string& cwd) {
+	bool showHidden = false;
+	for (size_t i = 0; i < args.size(); i++) {
+		if (args[i] == "-h" || args[i] == "--hidden") {
+			showHidden = true;
+			args.erase(args.begin()+i);
+		}
+	}
+	
 	/* For each directory in command line */
 	size_t i = 1;
 	while (i < args.size()) {
-
-		list_directory(args[i].c_str());
+		list_directory(args[i].c_str(), showHidden);
 		i++;
 	}
 
 	/* List current working directory if no arguments on command line */
 	if (args.size() == 1)
-		list_directory(".");
+		list_directory(".", showHidden);
 	return EXIT_SUCCESS;
 }
 
@@ -261,8 +282,8 @@ static void output_file(const char* fn) {
 	FILE* fp = fopen(fn, "r");
 	if (!fp) {
 		/* Could not open directory */
-		fprintf(stderr, "Cannot open %s (%s)\n", fn, strerror(errno));
-		exit(EXIT_FAILURE);
+		error("Cannot open " + std::string(fn));
+		return;
 	}
 
 	/* Output file to screen */
@@ -304,7 +325,13 @@ int API::help(std::vector<std::string> args, std::string& cwd) {
 				if (args[1] == API::builtin_list[i]) {
 					print(args[1] + " " + API::builtin_man[i], true);
 					return EXIT_SUCCESS;
-				};
+				} else if (args[1] == "color") {
+					print("color <int (0-7)>\nColors:\n");
+					int fix = 10;
+					print(charfix("0: BLACK", fix) + charfix("1: RED", fix) + charfix("2: GREEN", fix) + charfix("3: GOLD", fix) + '\n');
+					print(charfix("4: BLUE", fix) + charfix("5: PURPLE", fix) + charfix("6: CYAN", fix) + charfix("7: GREY (default)", fix) + '\n');
+					return EXIT_SUCCESS;
+				}
 			}
 		} else {
 			error("Usage: " + API::builtin_man[API::HELP]);
@@ -313,6 +340,7 @@ int API::help(std::vector<std::string> args, std::string& cwd) {
 	}
 	// assuming help all functions
 	cprint("Use `help [command]` too see a command\'s usage", bright_red, true);
+	print(charfix("color", 8) + " Change the color of the prompt", true);
 
 	for (size_t i = 0; i < sizeof(API::builtin_list) / sizeof(API::builtin_list[0]); i++) {
 		print(charfix(API::builtin_list[i], 8) + " " + API::builtin_desc[i], true);
@@ -385,27 +413,91 @@ int API::info(std::vector<std::string> args, std::string& cwd) {
 		error("Usage: info " + builtin_man[API::INFO] + "\nTypes: mem, cpu");
 		return EXIT_FAILURE;
 	}
-	unsigned long totalRam, freeRam, usedRam, cached, bufferRam, totalSwap, freeSwap;
-	unsigned short procs;
+	// unsigned short procs;
 	if (args[1] == "mem") {
 #ifdef _WIN32
+#include <winbase.h>
+		float totalRam, freeRam, usedRam, totalVirtual, freeVirtual;
+		DWORD memLoad;
+		struct _MEMORYSTATUS memstat;
+		
+		GlobalMemoryStatus(&memstat);
+		totalRam = memstat.dwTotalPhys / 1073741824.f;
+		freeRam = memstat.dwAvailPhys / 1073741824.f;
+		usedRam = totalRam - freeRam;
+		totalVirtual = memstat.dwTotalVirtual / 1099511627776.f;
+		freeVirtual = memstat.dwAvailVirtual / 1099511627776.f;
+		memLoad = memstat.dwMemoryLoad;
+		int c, bc;
+		if (memLoad >= 75) {
+			bc = red;
+			c = gray;
+		} else if (memLoad >= 50) {
+			bc = yellow;
+			c = black;
+		} else if (memLoad >= 25) {
+			bc = bright_green;
+			c = dark_gray;
+		} else {
+			bc = green;
+			c = black;
+		}
+		ANSI::background(bc);
+		ANSI::foreground(c);
+		printf("Memory Load: %lu%%\n", memLoad);
+		ANSI::reset();
+		printf("Total Ram: %.2f GiB\n", totalRam);
+		printf("Free Ram: %.2f GiB\n", freeRam);
+		if (usedRam < 1) {
+			usedRam *= 1024;
+			printf("Used Ram: %.0f MiB\n", usedRam);
+		} else {
+			printf("Used Ram: %.2f GiB\n", usedRam);
+		}
+		printf("Total Virtual Memory: %.2f TiB\n", totalVirtual);
+		printf("Free Virtual Memory: %.2f TiB\n", freeVirtual);
 
 #elif defined __unix__
-		totalRam = get_mem_total();
-		freeRam = get_mem_free();
+		float totalRam, freeRam, usedRam, cached, bufferRam, totalSwap, freeSwap, memLoad;
+		totalRam = get_mem_total() / 1048576.f;
+		freeRam = get_mem_free() / 1048576.f;
 		usedRam = totalRam - freeRam;
-		bufferRam = get_buffer_mem();
-		totalSwap = get_swap_mem_total();
-		freeSwap = get_swap_mem_free();
-		cached = get_cached_mem();
+		memLoad = usedRam / totalRam;
+		bufferRam = get_buffer_mem() / 1024.f;
+		totalSwap = get_swap_mem_total() / 1048576.f;
+		freeSwap = get_swap_mem_free() / 1048576.f;
+		cached = get_cached_mem() / 1024.f;
+		int c, bc;
+		if (memLoad >= 75) {
+			bc = red;
+			c = gray;
+		} else if (memLoad >= 50) {
+			bc = yellow;
+			c = black;
+		} else if (memLoad >= 25) {
+			bc = bright_green;
+			c = dark_gray;
+		} else {
+			bc = green;
+			c = black;
+		}
+		ANSI::background(bc);
+		ANSI::foreground(c);
+		printf("Memory Load: %.0f%%\n", memLoad);
+		ANSI::reset();
+		printf("Total Ram: %.2f GiB\n", totalRam);
+		printf("Free Ram: %.2f GiB\n", freeRam);
+		if (usedRam < 1) {
+			usedRam *= 1024;
+			printf("Used Ram: %.0f MiB\n", usedRam);
+		} else {
+			printf("Used Ram: %.2f GiB\n", usedRam);
+		}
+		printf("Buffer Mem: %.0f MiB\n", bufferRam);
+		printf("Cached Mem: %.0f MiB\n", cached);
+		printf("Total Swap Mem: %.0f GiB\n", totalSwap);
+		printf("Free Swap Mem: %.0f GiB\n", freeSwap);
 #endif
-		printf("Total Ram: %.2f MiB\n", totalRam / 1024.f);
-		printf("Free Ram: %.2f MiB\n", freeRam / 1024.f);
-		printf("Used Ram: %.2f MiB\n", usedRam / 1024.f);
-		printf("Buffer Mem: %.2f MiB\n", bufferRam / 1024.f);
-		printf("Cached Mem: %.2f MiB\n", cached / 1024.f);
-		printf("Total Swap Mem: %.2f MiB\n", totalSwap / 1024.f);
-		printf("Free Swap Mem: %.2f MiB\n", freeSwap / 1024.f);
 		return EXIT_SUCCESS;
 	} else if (args[1] == "cpu") {
 #ifdef _WIN32
@@ -413,8 +505,14 @@ int API::info(std::vector<std::string> args, std::string& cwd) {
 #elif defined __unix__
 
 #endif
+		return EXIT_SUCCESS;
 	} else {
 		error("Usage: info " + builtin_man[API::INFO] + "\nTypes: mem, cpu");
 		return EXIT_FAILURE;
 	}
+}
+
+int API::version(std::vector<std::string> args, std::string& cwd) {
+	cprint("Vader " + API::VERSION + '\n', purple);
+	return EXIT_SUCCESS;
 }

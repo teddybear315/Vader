@@ -22,7 +22,7 @@ char lower(char text) {
 }
 
 std::string error(std::string _err) {
-	cprint("Error: " + _err, red, true);
+	cprint("✘: " + _err, red, true);
 	return _err;
 }
 

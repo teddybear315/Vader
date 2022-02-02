@@ -1,16 +1,14 @@
 Commands:
-    ☐ md
-    ☐ rd
-    ☐ mf
-    ☐ rf
+    ☐ move
+    ☐ remove
     ☐ copy
+    ☐ create
     ☐ rename
-    ☐ version
-    ☐ color
-    ☐ sysinfo
-        ☐ mem
-        - get total & free mem
-        ☐ cpu
-        - get cpu name, speed
-        ☐ mb/motherboard
-        - get motherboard info
+    ✔ version @started(22-02-01 14:32) @done(22-02-01 14:34) @lasted(2m19s)
+    ☐ time
+    ☐ date
+    ☐ info
+        ✔ mem: get total & free mem @done(22-02-01 14:32)
+        ☐ cpu: get cpu name, speed
+        ☐ mb/motherboard: get motherboard info
+    ✔ color @done(22-02-02 17:00)

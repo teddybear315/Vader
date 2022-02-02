@@ -22,6 +22,8 @@ namespace VADER {
 		static int _clear(std::vector<std::string> args, std::string& cwd);
 		static int _welcome(std::vector<std::string> args, std::string& cwd);
 		static int info(std::vector<std::string> args, std::string& cwd);
+		static int version(std::vector<std::string> args, std::string& cwd);
+
 		static int clear();
 		static int welcome();
 
@@ -30,11 +32,12 @@ namespace VADER {
 
 		API();
 		~API();
-
-		static const std::string builtin_list[9];
-		static const std::string builtin_desc[9];
-		static const std::string builtin_man[9];
-		static int(*builtin_funcs[9])(std::vector<std::string>, std::string& cwd);
+		static constexpr int builtins = 10;
+		static const std::string builtin_list[builtins];
+		static const std::string builtin_desc[builtins];
+		static const std::string builtin_man[builtins];
+		static int(*builtin_funcs[builtins])(std::vector<std::string>, std::string& cwd);
+		std::string icon;
 	};
 }
 
