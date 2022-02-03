@@ -7,6 +7,9 @@
 #include <sstream>
 
 int main(int argc, char** argv) {
+    VADER::API api;
+    api.clear();
+    
     bool running = true;
     std::string input, cwd;
     const int color_palettes[8][4] = { // light, dark, color on light, color on dark
@@ -24,7 +27,7 @@ int main(int argc, char** argv) {
     int c;
     if (argc > 2) {
         error("Usage: vader <color (0-7)>");
-    } else {
+    } else if (argc != 1) {
         try {
             c = std::stoi(argv[1]);
             if (c > -1 && c < 8) {
@@ -32,9 +35,7 @@ int main(int argc, char** argv) {
                 colors[1] = color_palettes[c][1];
                 colors[2] = color_palettes[c][2];
                 colors[3] = color_palettes[c][3];
-            } else {
-                error("Usage: color <int (0-7)>");
-            }
+            } else error("Usage: color <int (0-7)>");
         } catch (const std::exception& e) {
             error("Usage: color <int (0-7)>");
         }
@@ -47,23 +48,24 @@ int main(int argc, char** argv) {
         colors[3] = color_palettes[7][3];
     }
 
-    VADER::API api;
-
     printf("\033]0;Vader\007");
-    system("chcp 65001"); // shh
 
-    api.clear();
+    api.cwd(cwd);
+    api.launch(std::vector<std::string>{"chcp","65001"}, cwd); // set utf8
+
     api.welcome();
+
+    time_t t; tm tm; char tb[10]; // variables used in time defined outside of loop because unnecessary to redefine every frame
 
     while (running) {
         api.cwd(cwd);
+        t = std::time(nullptr);
+        tm = *std::localtime(&t);
+        strftime(tb, sizeof(tb), "%H:%M:%S", &tm);
+
         cprint(" "+api.icon, black, white);
         printcaret(white, colors[0]);
-        auto t = std::time(nullptr);
-        auto tm = *std::localtime(&t);
-        char buffer[10];
-        strftime(buffer, sizeof(buffer), "%H:%M:%S", &tm);
-        cprint(" "+std::string(buffer), colors[2], colors[0]);
+        cprint(" "+std::string(tb), colors[2], colors[0]);
         printcaret(colors[0], colors[1]);
         cprint(" "+cwd, colors[3], colors[1]);
         printcaret(colors[1], black, true);
