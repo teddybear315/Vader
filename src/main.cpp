@@ -9,7 +9,7 @@
 int main(int argc, char** argv) {
     bool running = true;
     std::string input, cwd;
-    const int color_palettes[8][4] = { // light, dark
+    const int color_palettes[8][4] = { // light, dark, color on light, color on dark
         { dark_gray, black, white, white },
         { bright_red, red, white, white },
         { bright_green, green, white, white },
@@ -21,11 +21,12 @@ int main(int argc, char** argv) {
     };
     int colors[4];
 
-    int c = std::stoi(argv[1]);
+    int c;
     if (argc > 2) {
         error("Usage: vader <color (0-7)>");
     } else {
         try {
+            c = std::stoi(argv[1]);
             if (c > -1 && c < 8) {
                 colors[0] = color_palettes[c][0];
                 colors[1] = color_palettes[c][1];
@@ -39,7 +40,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (!(c > -1 && c < 8)) {
+    if (colors[3] == 0) { // all at index 3 white
         colors[0] = color_palettes[7][0];
         colors[1] = color_palettes[7][1];
         colors[2] = color_palettes[7][2];
