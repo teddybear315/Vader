@@ -39,7 +39,7 @@ const std::string API::builtin_list[API::builtins] = {
 	"clear",
 	"welcome",
 	"info",
-	"version"};
+	"version" };
 
 const std::string API::builtin_man[API::builtins] = {
 	"<path/directory...>",
@@ -59,7 +59,7 @@ const std::string API::builtin_desc[API::builtins] = {
 	"Prints input string",
 	"Prints input file",
 	"Prints this command",
-	"Shows a screen ruler, used for resizing to 80x25",
+	"Shows a screen ruler, used for resizing to 80x24",
 	"Clears the screen",
 	"Shows the welcome message",
 	"Gives information about the system",
@@ -79,13 +79,13 @@ int (*API::builtin_funcs[API::builtins])(std::vector<std::string>) = {
 };
 
 API::API() {
-	#ifdef __apple__
+#ifdef __apple__
 	icon = "";
-	#elif defined _WIN32
+#elif defined _WIN32
 	icon = "";
-	#elif defined __unix__
+#elif defined __unix__
 	icon = "";
-	#endif
+#endif
 }
 
 API::~API() {}
@@ -98,7 +98,7 @@ std::string API::cwd() {
 
 int API::launch(std::vector<std::string> args) {
 #ifdef __unix__
-	char* pargs[args.size()+1];
+	char* pargs[args.size() + 1];
 	if (args.size() > 1) {
 		size_t i = 0;
 		for (; i < args.size(); i++) {
@@ -157,7 +157,7 @@ int API::launch(std::vector<std::string> args) {
 		NULL,					// Use parent's starting directory
 		&si,					// Pointer to STARTUPINFO structure
 		&pi						// Pointer to PROCESS_INFORMATION structure
-		))
+	))
 	{
 #ifdef _DEBUG
 		print("[Vader DEBUG] Using system(command.c_str())...", true);
@@ -205,8 +205,8 @@ static void list_directory(std::string dirname, bool showHidden) {
 	DIR* dir;
 	try {
 		dir = opendir(dirname.c_str());
-	} catch(const std::exception& e) {
-		error("Cannot open "+dirname+" ("+e.what()+")");
+	} catch (const std::exception& e) {
+		error("Cannot open " + dirname + " (" + e.what() + ")");
 	}
 
 	struct dirent* ent;
@@ -264,10 +264,10 @@ int API::ls(std::vector<std::string> args) {
 	for (size_t i = 0; i < args.size(); i++) {
 		if (args[i] == "-h" || args[i] == "--hidden") {
 			showHidden = true;
-			args.erase(args.begin()+i);
+			args.erase(args.begin() + i);
 		}
 	}
-	
+
 	/* For each directory in command line */
 	size_t i = 1;
 	while (i < args.size()) {
@@ -353,7 +353,7 @@ int API::help(std::vector<std::string> args) {
 }
 
 int API::ruler(std::vector<std::string> args) {
-	int i, j, w = 80, h = 25;
+	int i, j, w = 80, h = 24;
 	for (i = 1; i <= h - 1; i++) {
 		for (j = 1; j <= w; j++) {
 			ANSI::foreground(white);
@@ -371,19 +371,20 @@ int API::ruler(std::vector<std::string> args) {
 				if (i % 10 == 0)
 					ANSI::foreground(red);
 				printf("%1d", i % 10);
-			} else if (j % 10 == 0 && i % 10 == 0)
-				printf("+");
+			} else if (j == 80 && i % 10 == 0) printf("┫");
+			else if (j % 10 == 0 && i % 10 == 0)
+				printf("╋");
 			else if (j % 10 == 0)
-				printf("|");
+				printf("┃");
 			else if (i % 10 == 0)
-				printf("-");
+				printf("━");
 			else
 				printf(" ");
 		}
 		printf("\n");
 	}
 	ANSI::foreground(red);
-	printf("25 ");
+	printf("%d ", h);
 	ANSI::reset();
 	return EXIT_SUCCESS;
 }
@@ -401,9 +402,9 @@ int API::_welcome(std::vector<std::string> args) {
 
 int API::clear() {
 #ifdef _WIN32
-	API::launch({"cls"});
+	API::launch({ "cls" });
 #elif defined __unix__
-	API::launch(std::vector<std::string>{"clear"});
+	API::launch({ "clear" });
 #endif
 	return EXIT_SUCCESS;
 }

@@ -244,7 +244,7 @@ void printcaret(int before_color, int after_color, bool head) {
 	cprint(" ", black, before_color);
 	cprint("", before_color, after_color);
 	if (head) print(" ", false);
-	else cprint(" ", black, after_color);
+	else cprint(" ", reset, after_color);
 }
 
 #ifdef _WIN32

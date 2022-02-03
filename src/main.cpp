@@ -15,9 +15,9 @@ int main(int argc, char** argv) {
 
     printf("\033]0;Vader\007"); // set title
 
-    #ifdef _WIN32
+#ifdef _WIN32
     api->launch({ "chcp", "65001" }); // set utf8
-    #endif
+#endif
     api->clear();
 
     const int color_palettes[8][4] = { // light, dark, color on light, color on dark
@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
         { bright_cyan, cyan, white, white },
         { gray, dark_gray, black, white }
     };
-    int colors[4] = {-1,-1,-1,-1};
+    int colors[4] = { -1,-1,-1,-1 };
 
     int c = -1;
     if (argc > 2) {
@@ -66,12 +66,12 @@ int main(int argc, char** argv) {
         tm = std::localtime(&t);
         strftime(tb, sizeof(tb), "%H:%M:%S", tm);
 
-        cprint(" "+api->icon, black, white);
+        cprint(" " + api->icon, black, white);
         printcaret(white, colors[0]);
-        cprint(" "+std::string(tb), colors[2], colors[0]);
+        cprint("   "+std::string(tb), colors[2], colors[0]);
         printcaret(colors[0], colors[1]);
-        cprint(" "+cwd, colors[3], colors[1]);
-        printcaret(colors[1], 0, true);
+        cprint("   "+cwd, colors[3], colors[1]);
+        printcaret(colors[1], reset, true);
 
         std::getline(std::cin, input);
 
@@ -108,8 +108,7 @@ int main(int argc, char** argv) {
                         error("Usage: color <int (0-7)>");
                     }
                 }
-            }
-            else api->launch(args);
+            } else api->launch(args);
         }
     }
 
