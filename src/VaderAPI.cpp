@@ -65,7 +65,7 @@ const std::string API::builtin_desc[API::builtins] = {
 	"Gives information about the system",
 	"Shows Vader\'s current version" };
 
-int (*API::builtin_funcs[API::builtins])(std::vector<std::string>, std::string& cwd) = {
+int (*API::builtin_funcs[API::builtins])(std::vector<std::string>) = {
 	&API::cd,
 	&API::ls,
 	&API::echo,
@@ -90,26 +90,31 @@ API::API() {
 
 API::~API() {}
 
-void API::cwd(std::string& cwd) {
+std::string API::cwd() {
 	char buff[FILENAME_MAX]; //create string buffer to hold path
 	GetCurrentDir(buff, FILENAME_MAX);
-	cwd = std::string(buff);
+	return std::string(buff);
 }
 
-int API::launch(std::vector<std::string> args, std::string& cwd) {
+int API::launch(std::vector<std::string> args) {
 #ifdef __unix__
-	char** pargs;
-	for (size_t i = 0; i < args.size(); i++) {
-		pargs[i] = (char*)args[i].c_str();
+	char* pargs[args.size()+1];
+	if (args.size() > 1) {
+		size_t i = 0;
+		for (; i < args.size(); i++) {
+			pargs[i] = (char*)args[i].c_str();
+		}
+		pargs[++i] = NULL;
+	} else {
+		pargs[0] = (char*)args[0].c_str();
+		pargs[1] = NULL;
 	}
-
 	pid_t pid;
 	int status;
 	pid = fork();
 	if (pid == 0) {
 		// Child process
-		if (execvp(args[0].c_str(), pargs) == -1)
-		{
+		if (execvp(args[0].c_str(), pargs) == -1) {
 			perror("Vader");
 		}
 		return EXIT_FAILURE;
@@ -158,7 +163,7 @@ int API::launch(std::vector<std::string> args, std::string& cwd) {
 		print("[Vader DEBUG] Using system(command.c_str())...", true);
 #endif
 		if (system(command.c_str()) != 0) {
-			cprint(args[0] + " does not exist in " + cwd, red, true);
+			cprint(args[0] + " does not exist in " + API::cwd(), red, true);
 		} else
 			b = true;
 	} else {
@@ -175,20 +180,19 @@ int API::launch(std::vector<std::string> args, std::string& cwd) {
 #endif
 }
 
-int API::cd(std::vector<std::string> args, std::string& cwd) {
+int API::cd(std::vector<std::string> args) {
 	for (size_t i = 1; i < args.size(); i++) {
 		if (strlen(args[1].c_str()) == 1) {
 			args[i] += ":/";
-			API::cd(args, cwd);
+			API::cd(args);
 		} else if (chdir(args[i].c_str()) != 0) {
-			error(args[i] + " does not exist in " + cwd);
+			error(args[i] + " does not exist in " + API::cwd());
 		}
-		API::cwd(cwd);
 	}
 	return EXIT_SUCCESS;
 }
 
-int API::echo(std::vector<std::string> args, std::string& cwd) {
+int API::echo(std::vector<std::string> args) {
 	for (size_t i = 1; i < args.size(); i++) {
 		print(args[i] + " ");
 	}
@@ -255,7 +259,7 @@ static void list_directory(std::string dirname, bool showHidden) {
 	closedir(dir);
 }
 
-int API::ls(std::vector<std::string> args, std::string& cwd) {
+int API::ls(std::vector<std::string> args) {
 	bool showHidden = false;
 	for (size_t i = 0; i < args.size(); i++) {
 		if (args[i] == "-h" || args[i] == "--hidden") {
@@ -302,7 +306,7 @@ static void output_file(const char* fn) {
 	fclose(fp);
 }
 
-int API::cat(std::vector<std::string> args, std::string& cwd) {
+int API::cat(std::vector<std::string> args) {
 	/* Require at least one file */
 	if (args.size() == 1) {
 		error("Usage: cat filename\n");
@@ -318,7 +322,7 @@ int API::cat(std::vector<std::string> args, std::string& cwd) {
 	return EXIT_SUCCESS;
 }
 
-int API::help(std::vector<std::string> args, std::string& cwd) {
+int API::help(std::vector<std::string> args) {
 	if (args.size() > 1) {
 		if (args.size() == 2) {
 			for (size_t i = 0; i < sizeof(API::builtin_list) / sizeof(API::builtin_list[0]); i++) {
@@ -348,7 +352,7 @@ int API::help(std::vector<std::string> args, std::string& cwd) {
 	return EXIT_SUCCESS;
 }
 
-int API::ruler(std::vector<std::string> args, std::string& cwd) {
+int API::ruler(std::vector<std::string> args) {
 	int i, j, w = 80, h = 25;
 	for (i = 1; i <= h - 1; i++) {
 		for (j = 1; j <= w; j++) {
@@ -391,24 +395,24 @@ int API::welcome() {
 	return EXIT_SUCCESS;
 }
 
-int API::_welcome(std::vector<std::string> args, std::string& cwd) {
+int API::_welcome(std::vector<std::string> args) {
 	return API::welcome();
 }
 
 int API::clear() {
 #ifdef _WIN32
-	system("cls");
-#elif defined __unix__ 
-	system("clear");
+	API::launch({"cls"});
+#elif defined __unix__
+	API::launch(std::vector<std::string>{"clear"});
 #endif
 	return EXIT_SUCCESS;
 }
 
-int API::_clear(std::vector<std::string> args, std::string& cwd) {
+int API::_clear(std::vector<std::string> args) {
 	return API::clear();
 }
 
-int API::info(std::vector<std::string> args, std::string& cwd) {
+int API::info(std::vector<std::string> args) {
 	if (args.size() != 2) {
 		error("Usage: info " + builtin_man[API::INFO] + "\nTypes: mem, cpu");
 		return EXIT_FAILURE;
@@ -420,7 +424,7 @@ int API::info(std::vector<std::string> args, std::string& cwd) {
 		float totalRam, freeRam, usedRam, totalVirtual, freeVirtual;
 		DWORD memLoad;
 		struct _MEMORYSTATUS memstat;
-		
+
 		GlobalMemoryStatus(&memstat);
 		totalRam = memstat.dwTotalPhys / 1073741824.f;
 		freeRam = memstat.dwAvailPhys / 1073741824.f;
@@ -512,7 +516,7 @@ int API::info(std::vector<std::string> args, std::string& cwd) {
 	}
 }
 
-int API::version(std::vector<std::string> args, std::string& cwd) {
+int API::version(std::vector<std::string> args) {
 	cprint("Vader " + API::VERSION + '\n', purple);
 	return EXIT_SUCCESS;
 }

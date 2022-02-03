@@ -6,12 +6,20 @@
 #include <ctime>
 #include <sstream>
 
+using namespace VADER;
+
 int main(int argc, char** argv) {
-    VADER::API api;
-    api.clear();
-    
+    API* api = new API();
     bool running = true;
-    std::string input, cwd;
+    std::string input, cwd = API::cwd();
+
+    printf("\033]0;Vader\007"); // set title
+
+    #ifdef _WIN32
+    api->launch({ "chcp", "65001" }); // set utf8
+    #endif
+    api->clear();
+
     const int color_palettes[8][4] = { // light, dark, color on light, color on dark
         { dark_gray, black, white, white },
         { bright_red, red, white, white },
@@ -22,9 +30,9 @@ int main(int argc, char** argv) {
         { bright_cyan, cyan, white, white },
         { gray, dark_gray, black, white }
     };
-    int colors[4];
+    int colors[4] = {-1,-1,-1,-1};
 
-    int c;
+    int c = -1;
     if (argc > 2) {
         error("Usage: vader <color (0-7)>");
     } else if (argc != 1) {
@@ -41,34 +49,29 @@ int main(int argc, char** argv) {
         }
     }
 
-    if (colors[3] == 0) { // all at index 3 white
+    if (colors[0] == -1) {
         colors[0] = color_palettes[7][0];
         colors[1] = color_palettes[7][1];
         colors[2] = color_palettes[7][2];
         colors[3] = color_palettes[7][3];
     }
 
-    printf("\033]0;Vader\007");
+    api->welcome();
 
-    api.cwd(cwd);
-    api.launch(std::vector<std::string>{"chcp","65001"}, cwd); // set utf8
-
-    api.welcome();
-
-    time_t t; tm tm; char tb[10]; // variables used in time defined outside of loop because unnecessary to redefine every frame
+    time_t t; tm* tm; char tb[16]; // variables used in time defined outside of loop because unnecessary to redefine every frame
 
     while (running) {
-        api.cwd(cwd);
-        t = std::time(nullptr);
-        tm = *std::localtime(&t);
-        strftime(tb, sizeof(tb), "%H:%M:%S", &tm);
+        cwd = API::cwd();
+        std::time(&t);
+        tm = std::localtime(&t);
+        strftime(tb, sizeof(tb), "%H:%M:%S", tm);
 
-        cprint(" "+api.icon, black, white);
+        cprint(" "+api->icon, black, white);
         printcaret(white, colors[0]);
         cprint(" "+std::string(tb), colors[2], colors[0]);
         printcaret(colors[0], colors[1]);
         cprint(" "+cwd, colors[3], colors[1]);
-        printcaret(colors[1], black, true);
+        printcaret(colors[1], 0, true);
 
         std::getline(std::cin, input);
 
@@ -78,10 +81,10 @@ int main(int argc, char** argv) {
 
         bool used_builtin = false;
 
-        for (size_t i = 0; i < sizeof(api.builtin_list) / sizeof(std::string); i++) {
-            if (args[0] == api.builtin_list[i]) {
+        for (size_t i = 0; i < sizeof(api->builtin_list) / sizeof(std::string); i++) {
+            if (args[0] == api->builtin_list[i]) {
                 used_builtin = true;
-                (*api.builtin_funcs[i])(args, cwd);
+                (*api->builtin_funcs[i])(args);
             }
         }
 
@@ -106,7 +109,7 @@ int main(int argc, char** argv) {
                     }
                 }
             }
-            else api.launch(args, cwd);
+            else api->launch(args);
         }
     }
 

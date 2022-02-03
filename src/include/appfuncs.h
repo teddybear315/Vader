@@ -29,7 +29,6 @@ namespace ANSI {
 
 std::vector<std::string> parse(std::string input);
 
-
 #ifdef __unix__
 unsigned long get_mem_total();
 unsigned long get_mem_free();

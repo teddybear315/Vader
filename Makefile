@@ -4,8 +4,8 @@
 
 # Compiler settings - Can be customized.
 CC = g++
-CXXFLAGS = -std=c++11 -Wall -g #-O3 
-LDFLAGS = 
+CXXFLAGS = -std=c++11 -Wall -g #-O3
+LDFLAGS =
 
 # Makefile settings - Can be customized.
 APPNAME = dist/Vader
@@ -16,7 +16,6 @@ OBJDIR = obj
 ############## Do not change anything from here downwards! #############
 SRC = $(wildcard $(SRCDIR)/*$(EXT))
 OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
-DEP = $(OBJ:$(OBJDIR)/%.o=$(OBJDIR)/%.d)
 # UNIX-based OS variables & settings
 RM = rm
 DELOBJ = $(OBJ)
@@ -24,7 +23,6 @@ DELOBJ = $(OBJ)
 DEL = del
 EXE = .exe
 WDELOBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)\\%.o)
-WDELDEP = $(OBJ:$(OBJDIR)/%.o=$(OBJDIR)\\%.d)
 
 ########################################################################
 ####################### Targets beginning here #########################
@@ -36,13 +34,6 @@ all: $(APPNAME)
 $(APPNAME): $(OBJ)
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Creates the dependecy rules
-$(OBJDIR)/%.d: $(SRCDIR)/%$(EXT)
-	@$(CPP) $(CFLAGS) $< -MM -MT $(@:$(OBJDIR)/%.d=$(OBJDIR)/%.o) >$@
-
-# Includes all .h files
--include $(DEP)
-
 # Building rule for .o files and its .c/.cpp in combination with all .h
 $(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
 	$(CC) $(CXXFLAGS) -o $@ -c $<
@@ -53,18 +44,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
 clean:
 	$(RM) $(DELOBJ) $(DEP)
 
-# Cleans only all files with the extension .d
-.PHONY: cleandep
-cleandep:
-	$(RM) $(DEP)
-
 #################### Cleaning rules for Windows OS #####################
 # Cleans complete project
 .PHONY: cleanw
 cleanw:
-	$(DEL) $(WDELOBJ) $(WDELDEP)
-
-# Cleans only all files with the extension .d
-.PHONY: cleandepw
-cleandepw:
-	$(DEL) $(DEP)
+	$(DEL) $(WDELOBJ)
