@@ -1,8 +1,10 @@
-#ifndef APPFUNC_H	
+#ifndef APPFUNC_H
 #define APPFUNC_H
 
 #include <iostream>
 #include <vector>
+
+#include "icons.h"
 
 void clear();
 

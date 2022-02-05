@@ -1,5 +1,6 @@
 #include "include/appfuncs.h"
 #include "include/colors.h"
+#include "include/icons.h"
 
 #include <iostream>
 #include <vector>
@@ -242,7 +243,7 @@ unsigned long get_cached_mem() {
 
 void printcaret(int before_color, int after_color, bool head) {
 	cprint(" ", black, before_color);
-	cprint("", before_color, after_color);
+	cprint(icons::LEFT_CARET, before_color, after_color);
 	if (head) print(" ", false);
 	else cprint(" ", reset, after_color);
 }

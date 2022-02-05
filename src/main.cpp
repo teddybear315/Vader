@@ -68,9 +68,9 @@ int main(int argc, char** argv) {
 
         cprint(" " + api->icon, black, white);
         printcaret(white, colors[0]);
-        cprint("   "+std::string(tb), colors[2], colors[0]);
+        cprint(icons::CLOCK + ' ' + std::string(tb), colors[2], colors[0]);
         printcaret(colors[0], colors[1]);
-        cprint("   "+cwd, colors[3], colors[1]);
+        cprint(icons::FOLDER + ' ' + cwd, colors[3], colors[1]);
         printcaret(colors[1], reset, true);
 
         std::getline(std::cin, input);

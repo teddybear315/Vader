@@ -80,11 +80,11 @@ int (*API::builtin_funcs[API::builtins])(std::vector<std::string>) = {
 
 API::API() {
 #ifdef __apple__
-	icon = "";
+	icon = icons::company::APPLE;
 #elif defined _WIN32
-	icon = "";
+	icon = icons::company::WINDOWS;
 #elif defined __unix__
-	icon = "";
+	icon = icons::company::LINUX;
 #endif
 }
 
@@ -221,7 +221,7 @@ static void list_directory(std::string dirname, bool showHidden) {
 		}
 #endif
 		if (namelen + 1 > max_size && ((ent->d_name[0] == '.' && showHidden) || (ent->d_name[0] != '.'))) max_size = namelen + 1;
-	}
+		}
 
 	closedir(dir);
 	dir = opendir(dirname.c_str());
@@ -257,7 +257,7 @@ static void list_directory(std::string dirname, bool showHidden) {
 	print();
 
 	closedir(dir);
-}
+	}
 
 int API::ls(std::vector<std::string> args) {
 	bool showHidden = false;
