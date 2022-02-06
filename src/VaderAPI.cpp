@@ -393,8 +393,8 @@ int API::welcome() {
 	cprint("╔═════════════════════════════════╗ Vader " + VADER::API::VERSION, 5, true);
 	cprint("║        ███████████            ║ Copyright Logan Houston 2022.", 5, true);
 	cprint("║          █                ║ All rights reserved.", 5, true);
-	cprint("║       ▓▓ █ █▓ ▓▓            ║ Vader recommends using a nerd font.", 5, true);
-	cprint("║      █ ▓      █ ▓         ║", 5, true);
+	cprint("║       ▓▓ █ █▓ ▓▓▓           ║ Vader recommends using a nerd font.", 5, true);
+	cprint("║      █ ▓      █▓          ║", 5, true);
 	cprint("║      █ ▓  █ █     █   █         ║", 5, true);
 	cprint("║      █▄▄▄▄██ ▄▄▄           ║", 5, true);
 	cprint("║         █    █          ║", 5, true);
