@@ -389,30 +389,44 @@ int API::ruler(std::vector<std::string> args) {
 	return EXIT_SUCCESS;
 }
 
-int API::welcome(int color) {
-	cprint("╔═════════════════════════════════╗ Vader " + VADER::API::VERSION, color, true);
-	cprint("║        ███████████            ║ Copyright Logan Houston 2022.", color, true);
-	cprint("║          █                ║ All rights reserved.", color, true);
-	cprint("║       ▓▓ █ █▓ ▓▓▓           ║ Vader recommends using a nerd font.", color, true);
-	cprint("║      █ ▓      █▓          ║", color, true);
-	cprint("║      █ ▓  █ █     █   █         ║", color, true);
-	cprint("║      █▄▄▄▄██ ▄▄▄           ║", color, true);
-	cprint("║         █    █          ║", color, true);
-	cprint("║         █   █          ║", color, true);
-	cprint("║      ▀▀▀▀▀▀▀▀▀▀█          ║", color, true);
-	cprint("║        ▄▄▄▄▄  █      █     ║", color, true);
-	cprint("║      ▓ ▓ ▓ ██   ░░░▓▓▓    ║", color, true);
-	cprint("║ █      █▓ ▓ ▓  █ ░░░    ▓▓   ║", color, true);
-	cprint("║ █      ███████░░░         ▓  ║", color, true);
-	cprint("║                            █  ║", color, true);
-	cprint("║  ███████████████████████████  ║", color, true);
-	cprint("╚═════════════════════════════════╝", color, true);
+int API::welcome(int colors[4]) {
+	cprint("╔═════════════════════════════════╤════════════════════════════════════════════╗", colors[1], true);
+	cprint("║",colors[1]); cprint("        ███████████            ",colors[0]);cprint("│", colors[1]); cprint(" Vader " + charfix(VADER::API::VERSION, 8), colors[0]);
+		cprint("                             ║", colors[1], true);
+	cprint("║",colors[1]); cprint("          █                ",colors[0]);cprint("│", colors[1]); cprint(" Copyright Logan Houston 2022.              ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("       ▓▓ █ █▓ ▓▓▓           ",colors[0]);cprint("│", colors[1]); cprint(" All rights reserved.                       ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("      █ ▓      █▓          ",colors[0]);cprint("│", colors[1]); cprint(" Vader recommends using a nerd font.        ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("      █ ▓  █ █     █   █         ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("      █▄▄▄▄██ ▄▄▄           ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("         █    █          ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("         █   █          ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("      ▀▀▀▀▀▀▀▀▀▀█          ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("        ▄▄▄▄▄  █      █     ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("      ▓ ▓ ▓ ██   ░░░▓▓▓    ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint(" █      █▓ ▓ ▓  █ ░░░    ▓▓   ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint(" █      ███████░░░         ▓  ",colors[0]);cprint("│", colors[1]); cprint("                                            ", colors[0]);cprint("║", colors[1], true);
+	cprint("║",colors[1]); cprint("                            █  ",colors[0]);cprint("│ ", colors[1]);
+	for (int x = 0; x < 2; x++) {
+		for (int i = 0; i < 7; i++) {
+			cprint("  ", reset, i + (x * 60));
+		}
+		cprint("                             ║", colors[1], true);
+		if (x == 0) {
+			cprint("║", colors[1]); cprint("  ███████████████████████████  ", colors[0]); cprint("│ ", colors[1]);
+		}
+	}
+	cprint("╚═════════════════════════════════╧════════════════════════════════════════════╝", colors[1], true);
 
 	return EXIT_SUCCESS;
 }
 
 int API::_welcome(std::vector<std::string> args) {
-	return API::welcome(stoi(args[1]));
+	if (args.size() != 5) {
+		error("Something went wrong passing the colors to the command");
+		return EXIT_FAILURE;
+	}
+	int arg2[5] = { stoi(args[1]), stoi(args[2]), stoi(args[3]), stoi(args[4]) };
+	return API::welcome(arg2);
 }
 
 int API::clear() {

@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
         api->colors[3] = color_palettes[7][3];
     }
 
-    api->welcome(api->colors[1]);
+    api->welcome(api->colors);
 
     time_t t; tm* tm; char tb[16]; // variables used in time defined outside of loop because unnecessary to redefine every frame
 
@@ -83,6 +83,12 @@ int main(int argc, char** argv) {
         for (size_t i = 0; i < sizeof(api->builtin_list) / sizeof(std::string); i++) {
             if (args[0] == api->builtin_list[i]) {
                 if (lower(args[0]) == "welcome") {
+                    int _ = 0;
+                    while (args.size() != 5) {
+                        args.push_back("");
+                        args[args.size() - 1] = std::to_string(api->colors[_]);
+                        _++;
+                    }
                     if (args.size() == 1) args.push_back("");
                     args[1] = std::to_string(api->colors[0]); // welcome command force color as second arg
                 }

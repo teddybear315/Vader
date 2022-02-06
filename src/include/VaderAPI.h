@@ -25,7 +25,7 @@ namespace VADER {
 		static int version(std::vector<std::string> args);
 
 		static int clear();
-		static int welcome(int color);
+		static int welcome(int colors[4]);
 
 		static int launch(std::vector<std::string> args);
 		static std::string cwd();

@@ -12,5 +12,6 @@ Commands:
         ☐ cpu: get cpu name, speed
         ☐ mb/motherboard: get motherboard info
     ✔ color @done(22-02-02 17:00)
+    ☐ add info to welcome command: os, ram, cpu, gpu and color test
 General Improvements:
     ☐ C-ify: remove std requirements like strings and vectors
