@@ -40,9 +40,14 @@ $(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
 
 ################### Cleaning rules for Unix-based OS ###################
 # Cleans complete project
-.PHONY: clean
+.PHONY: clean install
 clean:
 	$(RM) $(DELOBJ) $(DEP)
+
+install:
+	sudo rm -rf /bin/vader
+	sudo cp dist/Vader .
+	sudo mv Vader /bin/vader
 
 #################### Cleaning rules for Windows OS #####################
 # Cleans complete project
