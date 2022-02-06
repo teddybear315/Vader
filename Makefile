@@ -8,7 +8,7 @@ CXXFLAGS = -std=c++11 -Wall# -g -O3
 LDFLAGS =
 
 # Makefile settings - Can be customized.
-APPNAME = dist/Vader
+APPNAME = dist/vader
 EXT = .cpp
 SRCDIR = src
 OBJDIR = obj
@@ -47,8 +47,8 @@ clean:
 uninstall:
 	sudo rm -rf /bin/vader
 install: uninstall
-	sudo cp dist/Vader .
-	sudo mv Vader /bin/vader
+	sudo cp dist/vader .
+	sudo mv vader /bin/vader
 
 #################### Cleaning rules for Windows OS #####################
 # Cleans complete project

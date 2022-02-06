@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
             if (args[0] == api->builtin_list[i]) {
                 if (lower(args[0]) == "welcome") {
                     if (args.size() == 1) args.push_back("");
-                    args[1] = std::to_string(api->colors[1]); // welcome command force color as second arg
+                    args[1] = std::to_string(api->colors[0]); // welcome command force color as second arg
                 }
                 used_builtin = true;
                 (*api->builtin_funcs[i])(args);
