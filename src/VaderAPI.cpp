@@ -389,30 +389,30 @@ int API::ruler(std::vector<std::string> args) {
 	return EXIT_SUCCESS;
 }
 
-int API::welcome() {
-	cprint("╔═════════════════════════════════╗ Vader " + VADER::API::VERSION, 5, true);
-	cprint("║        ███████████            ║ Copyright Logan Houston 2022.", 5, true);
-	cprint("║          █                ║ All rights reserved.", 5, true);
-	cprint("║       ▓▓ █ █▓ ▓▓▓           ║ Vader recommends using a nerd font.", 5, true);
-	cprint("║      █ ▓      █▓          ║", 5, true);
-	cprint("║      █ ▓  █ █     █   █         ║", 5, true);
-	cprint("║      █▄▄▄▄██ ▄▄▄           ║", 5, true);
-	cprint("║         █    █          ║", 5, true);
-	cprint("║         █   █          ║", 5, true);
-	cprint("║      ▀▀▀▀▀▀▀▀▀▀█          ║", 5, true);
-	cprint("║        ▄▄▄▄▄  █      █     ║", 5, true);
-	cprint("║      ▓ ▓ ▓ ██   ░░░▓▓▓    ║", 5, true);
-	cprint("║ █      █▓ ▓ ▓  █ ░░░    ▓▓   ║", 5, true);
-	cprint("║ █      ███████░░░         ▓  ║", 5, true);
-	cprint("║                            █  ║", 5, true);
-	cprint("║  ███████████████████████████  ║", 5, true);
-	cprint("╚═════════════════════════════════╝", 5, true);
+int API::welcome(int color) {
+	cprint("╔═════════════════════════════════╗ Vader " + VADER::API::VERSION, color, true);
+	cprint("║        ███████████            ║ Copyright Logan Houston 2022.", color, true);
+	cprint("║          █                ║ All rights reserved.", color, true);
+	cprint("║       ▓▓ █ █▓ ▓▓▓           ║ Vader recommends using a nerd font.", color, true);
+	cprint("║      █ ▓      █▓          ║", color, true);
+	cprint("║      █ ▓  █ █     █   █         ║", color, true);
+	cprint("║      █▄▄▄▄██ ▄▄▄           ║", color, true);
+	cprint("║         █    █          ║", color, true);
+	cprint("║         █   █          ║", color, true);
+	cprint("║      ▀▀▀▀▀▀▀▀▀▀█          ║", color, true);
+	cprint("║        ▄▄▄▄▄  █      █     ║", color, true);
+	cprint("║      ▓ ▓ ▓ ██   ░░░▓▓▓    ║", color, true);
+	cprint("║ █      █▓ ▓ ▓  █ ░░░    ▓▓   ║", color, true);
+	cprint("║ █      ███████░░░         ▓  ║", color, true);
+	cprint("║                            █  ║", color, true);
+	cprint("║  ███████████████████████████  ║", color, true);
+	cprint("╚═════════════════════════════════╝", color, true);
 
 	return EXIT_SUCCESS;
 }
 
 int API::_welcome(std::vector<std::string> args) {
-	return API::welcome();
+	return API::welcome(stoi(args[1]));
 }
 
 int API::clear() {

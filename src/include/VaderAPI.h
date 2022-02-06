@@ -25,7 +25,7 @@ namespace VADER {
 		static int version(std::vector<std::string> args);
 
 		static int clear();
-		static int welcome();
+		static int welcome(int color);
 
 		static int launch(std::vector<std::string> args);
 		static std::string cwd();
@@ -38,6 +38,7 @@ namespace VADER {
 		static const std::string builtin_man[builtins];
 		static int(*builtin_funcs[builtins])(std::vector<std::string>);
 		std::string icon;
+		int colors[4] = { -1,-1,-1,-1 };
 	};
 }
 
