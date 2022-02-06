@@ -221,7 +221,7 @@ static void list_directory(std::string dirname, bool showHidden) {
 		}
 #endif
 		if (namelen + 1 > max_size && ((ent->d_name[0] == '.' && showHidden) || (ent->d_name[0] != '.'))) max_size = namelen + 1;
-		}
+	}
 
 	closedir(dir);
 	dir = opendir(dirname.c_str());
@@ -257,7 +257,7 @@ static void list_directory(std::string dirname, bool showHidden) {
 	print();
 
 	closedir(dir);
-	}
+}
 
 int API::ls(std::vector<std::string> args) {
 	bool showHidden = false;
@@ -390,9 +390,24 @@ int API::ruler(std::vector<std::string> args) {
 }
 
 int API::welcome() {
-	cprint("Vader " + VADER::API::VERSION, 5, true);
-	cprint("Copyright Logan Houston 2022. All rights reserved.", 5, true);
-	cprint("Vader recommends using a nerd font", 5, true);
+	cprint("╔═════════════════════════════════╗ Vader " + VADER::API::VERSION, 5, true);
+	cprint("║        ███████████            ║ Copyright Logan Houston 2022.", 5, true);
+	cprint("║          █                ║ All rights reserved.", 5, true);
+	cprint("║       ▓▓ █ █▓ ▓▓            ║ Vader recommends using a nerd font.", 5, true);
+	cprint("║      █ ▓      █ ▓         ║", 5, true);
+	cprint("║      █ ▓  █ █     █   █         ║", 5, true);
+	cprint("║      █▄▄▄▄██ ▄▄▄           ║", 5, true);
+	cprint("║         █    █          ║", 5, true);
+	cprint("║         █   █          ║", 5, true);
+	cprint("║      ▀▀▀▀▀▀▀▀▀▀█          ║", 5, true);
+	cprint("║        ▄▄▄▄▄  █      █     ║", 5, true);
+	cprint("║      ▓ ▓ ▓ ██   ░░░▓▓▓    ║", 5, true);
+	cprint("║ █      █▓ ▓ ▓  █ ░░░    ▓▓   ║", 5, true);
+	cprint("║ █      ███████░░░         ▓  ║", 5, true);
+	cprint("║                            █  ║", 5, true);
+	cprint("║  ███████████████████████████  ║", 5, true);
+	cprint("╚═════════════════════════════════╝", 5, true);
+
 	return EXIT_SUCCESS;
 }
 

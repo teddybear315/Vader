@@ -23,11 +23,11 @@ int main(int argc, char** argv) {
     const int color_palettes[8][4] = { // light, dark, color on light, color on dark
         { dark_gray, black, white, white },
         { bright_red, red, white, white },
-        { bright_green, green, white, white },
+        { bright_green, green, black, white },
         { bright_yellow, yellow, black, white },
         { bright_blue, blue, white, white },
         { bright_magenta, purple, white, white },
-        { bright_cyan, cyan, white, white },
+        { bright_cyan, cyan, black, white },
         { gray, dark_gray, black, white }
     };
     int colors[4] = { -1,-1,-1,-1 };
