@@ -6,39 +6,37 @@
 #include <vector>
 #include <stdlib.h>
 #include <cstdlib>
+#include <array>
 #include "colors.h"
 
 namespace VADER {
-	class API {
-	public:
+	namespace API {
 		enum Commands { CD, LS, ECHO, CAT, HELP, RULER, CLEAR, WELCOME, INFO };
-		static std::string MAJOR, MINOR, PATCH, VERSION;
-		static int cd(std::vector<std::string> args);
-		static int echo(std::vector<std::string> args);
-		static int ls(std::vector<std::string> args);
-		static int cat(std::vector<std::string> args);
-		static int help(std::vector<std::string> args);
-		static int ruler(std::vector<std::string> args);
-		static int _clear(std::vector<std::string> args);
-		static int _welcome(std::vector<std::string> args);
-		static int info(std::vector<std::string> args);
-		static int version(std::vector<std::string> args);
+		extern std::string MAJOR, MINOR, PATCH, VERSION;
+		extern int cd(std::vector<std::string> args);
+		extern int echo(std::vector<std::string> args);
+		extern int ls(std::vector<std::string> args);
+		extern int cat(std::vector<std::string> args);
+		extern int help(std::vector<std::string> args);
+		extern int ruler(std::vector<std::string> args);
+		extern int _clear(std::vector<std::string> args);
+		extern int _welcome(std::vector<std::string> args);
+		extern int info(std::vector<std::string> args);
+		extern int version(std::vector<std::string> args);
 
-		static int clear();
-		static int welcome(int colors[4]);
+		extern int clear();
+		extern int welcome(std::array<int, 4> colors);
 
-		static int launch(std::vector<std::string> args);
-		static std::string cwd();
+		extern int launch(std::vector<std::string> args);
+		extern std::string cwd();
 
-		API();
-		~API();
-		static constexpr int builtins = 10;
-		static const std::string builtin_list[builtins];
-		static const std::string builtin_desc[builtins];
-		static const std::string builtin_man[builtins];
-		static int(*builtin_funcs[builtins])(std::vector<std::string>);
-		std::string icon;
-		int colors[4] = { -1,-1,-1,-1 };
+		constexpr int builtins = 10;
+		extern const std::array<std::string, builtins> builtin_list;
+		extern const std::array<std::string, builtins> builtin_desc;
+		extern const std::array<std::string, builtins> builtin_man;
+		extern int(*builtin_funcs[builtins])(std::vector<std::string>);
+		extern std::string icon;
+		extern std::array<int, 4> colors;
 	};
 }
 

@@ -132,6 +132,17 @@ int resultIndex(std::vector<std::string> arr, std::string k) {
 	return -1;
 }
 
+std::string explain(std::string in) {
+	std::stringstream returnval;
+	for (int i = 0; i < in.size(); i++) {
+		char hex[6];
+		sprintf(hex, "0x%X", (int)in[i]); //convert number to hex
+		print(charfix(hex, 6));
+	}
+	print();
+	return returnval.str();
+}
+
 #ifdef __unix__
 #include <cstring>
 #include <sys/sysinfo.h>

@@ -9,18 +9,25 @@
 using namespace VADER;
 
 int main(int argc, char** argv) {
-    API* api = new API();
     bool running = true;
     std::string input, cwd = API::cwd();
+
+#ifdef __apple__
+    API::icon = icons::company::APPLE;
+#elif defined _WIN32
+    API::icon = icons::company::WINDOWS;
+#elif defined __unix__
+    API::icon = icons::company::LINUX;
+#endif
 
     printf("\033]0;Vader\007"); // set title
 
 #ifdef _WIN32
-    api->launch({ "chcp", "65001" }); // set utf8
+    API::launch({ "chcp", "65001" }); // set utf8
 #endif
-    api->clear();
+    API::clear();
 
-    const int color_palettes[8][4] = { // light, dark, color on light, color on dark
+    const std::array<int, 4> color_palettes[8] = { // light, dark, color on light, color on dark
         { dark_gray, black, white, white },
         { bright_red, red, white, white },
         { bright_green, green, black, white },
@@ -38,24 +45,21 @@ int main(int argc, char** argv) {
         try {
             c = std::stoi(argv[1]);
             if (c > -1 && c < 8) {
-                api->colors[0] = color_palettes[c][0];
-                api->colors[1] = color_palettes[c][1];
-                api->colors[2] = color_palettes[c][2];
-                api->colors[3] = color_palettes[c][3];
+                API::colors = color_palettes[c];
             } else error("Usage: color <int (0-7)>");
         } catch (const std::exception& e) {
             error("Usage: color <int (0-7)>");
         }
     }
 
-    if (api->colors[0] == -1) {
-        api->colors[0] = color_palettes[7][0];
-        api->colors[1] = color_palettes[7][1];
-        api->colors[2] = color_palettes[7][2];
-        api->colors[3] = color_palettes[7][3];
+    if (API::colors[0] == -1) {
+        API::colors[0] = color_palettes[7][0];
+        API::colors[1] = color_palettes[7][1];
+        API::colors[2] = color_palettes[7][2];
+        API::colors[3] = color_palettes[7][3];
     }
 
-    api->welcome(api->colors);
+    API::welcome(API::colors);
 
     time_t t; tm* tm; char tb[16]; // variables used in time defined outside of loop because unnecessary to redefine every frame
 
@@ -65,12 +69,12 @@ int main(int argc, char** argv) {
         tm = std::localtime(&t);
         strftime(tb, sizeof(tb), "%H:%M:%S", tm);
 
-        cprint(" " + api->icon, black, white);
-        printcaret(white, api->colors[0]);
-        cprint(icons::CLOCK + ' ' + std::string(tb), api->colors[2], api->colors[0]);
-        printcaret(api->colors[0], api->colors[1]);
-        cprint(icons::FOLDER + ' ' + cwd, api->colors[3], api->colors[1]);
-        printcaret(api->colors[1], reset, true);
+        cprint(" " + API::icon, black, white);
+        printcaret(white, API::colors[0]);
+        cprint(icons::CLOCK + ' ' + std::string(tb), API::colors[2], API::colors[0]);
+        printcaret(API::colors[0], API::colors[1]);
+        cprint(icons::FOLDER + ' ' + cwd, API::colors[3], API::colors[1]);
+        printcaret(API::colors[1], reset, true);
 
         std::getline(std::cin, input);
 
@@ -80,20 +84,20 @@ int main(int argc, char** argv) {
 
         bool used_builtin = false;
 
-        for (size_t i = 0; i < sizeof(api->builtin_list) / sizeof(std::string); i++) {
-            if (args[0] == api->builtin_list[i]) {
+        for (size_t i = 0; i < sizeof(API::builtin_list) / sizeof(std::string); i++) {
+            if (args[0] == API::builtin_list[i]) {
                 if (lower(args[0]) == "welcome") {
                     int _ = 0;
                     while (args.size() != 5) {
                         args.push_back("");
-                        args[args.size() - 1] = std::to_string(api->colors[_]);
+                        args[args.size() - 1] = std::to_string(API::colors[_]);
                         _++;
                     }
                     if (args.size() == 1) args.push_back("");
-                    args[1] = std::to_string(api->colors[0]); // welcome command force color as second arg
+                    args[1] = std::to_string(API::colors[0]); // welcome command force color as second arg
                 }
                 used_builtin = true;
-                (*api->builtin_funcs[i])(args);
+                (*API::builtin_funcs[i])(args);
             }
         }
 
@@ -106,10 +110,10 @@ int main(int argc, char** argv) {
                     try {
                         int c = std::stoi(args[1]);
                         if (c > -1 && c < 8) {
-                            api->colors[0] = color_palettes[c][0];
-                            api->colors[1] = color_palettes[c][1];
-                            api->colors[2] = color_palettes[c][2];
-                            api->colors[3] = color_palettes[c][3];
+                            API::colors[0] = color_palettes[c][0];
+                            API::colors[1] = color_palettes[c][1];
+                            API::colors[2] = color_palettes[c][2];
+                            API::colors[3] = color_palettes[c][3];
                         } else {
                             error("Usage: color <int (0-7)>");
                         }
@@ -119,7 +123,7 @@ int main(int argc, char** argv) {
                 }
             } else if (args[0] == argv[0]) {
                 error("Don\'t do that to me pls");
-            } else api->launch(args);
+            } else API::launch(args);
         }
     }
 

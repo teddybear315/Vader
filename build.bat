@@ -1,2 +1,2 @@
-make && make cleanw
-vader
+make
+make cleanw

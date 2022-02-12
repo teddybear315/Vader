@@ -19,6 +19,7 @@ std::string cprint(std::string text, int foreground);
 std::string cprint(std::string text, int foreground, int background);
 std::string cprint(std::string text, int foreground, bool newLine);
 std::string cprint(std::string text, int foreground, int background, bool newLine);
+std::string explain(std::string text);
 int resultIndex(std::vector<std::string> arr, std::string k);
 std::string charfix(std::string in, int chars);
 void printcaret(int before_color, int after_color, bool head = false);

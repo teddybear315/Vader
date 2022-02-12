@@ -1,3 +1,4 @@
+#include <sstream>
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,10 @@ std::string API::MINOR = "1";
 std::string API::PATCH = "0";
 std::string API::VERSION = "v" + API::MAJOR + "." + API::MINOR + "." + API::PATCH;
 
-const std::string API::builtin_list[API::builtins] = {
+std::array<int, 4> API::colors = { -1,-1,-1,-1 };
+std::string API::icon = "☺";
+
+const std::array<std::string, API::builtins> API::builtin_list = {
 	"cd",
 	"ls",
 	"echo",
@@ -41,7 +45,7 @@ const std::string API::builtin_list[API::builtins] = {
 	"info",
 	"version" };
 
-const std::string API::builtin_man[API::builtins] = {
+const std::array<std::string, API::builtins> API::builtin_man = {
 	"<path/directory...>",
 	"[path/directory...]",
 	"<string>",
@@ -53,7 +57,7 @@ const std::string API::builtin_man[API::builtins] = {
 	"<type>",
 	"" };
 
-const std::string API::builtin_desc[API::builtins] = {
+const std::array<std::string, API::builtins> API::builtin_desc = {
 	"Changes directory",
 	"List files and subdirectories",
 	"Prints input string",
@@ -77,18 +81,6 @@ int (*API::builtin_funcs[API::builtins])(std::vector<std::string>) = {
 	&API::info,
 	&API::version,
 };
-
-API::API() {
-#ifdef __apple__
-	icon = icons::company::APPLE;
-#elif defined _WIN32
-	icon = icons::company::WINDOWS;
-#elif defined __unix__
-	icon = icons::company::LINUX;
-#endif
-}
-
-API::~API() {}
 
 std::string API::cwd() {
 	char buff[FILENAME_MAX]; //create string buffer to hold path
@@ -162,10 +154,7 @@ int API::launch(std::vector<std::string> args) {
 #ifdef _DEBUG
 		print("[Vader DEBUG] Using system(command.c_str())...", true);
 #endif
-		if (system(command.c_str()) != 0) {
-			cprint(args[0] + " does not exist in " + API::cwd(), red, true);
-		} else
-			b = true;
+		if (system(command.c_str()) == 0)	b = true;
 	} else {
 		b = true;
 		// Wait until child process exits.
@@ -338,7 +327,7 @@ int API::help(std::vector<std::string> args) {
 				}
 			}
 		} else {
-			error("Usage: " + API::builtin_man[API::HELP]);
+			error("Usage: " + API::builtin_man[API::Commands::HELP]);
 		}
 		return EXIT_FAILURE;
 	}
@@ -389,7 +378,7 @@ int API::ruler(std::vector<std::string> args) {
 	return EXIT_SUCCESS;
 }
 
-int API::welcome(int colors[4]) {
+int API::welcome(std::array<int, 4> colors) {
 	cprint("╔═════════════════════════════════╤════════════════════════════════════════════╗", colors[1], true);
 	cprint("║",colors[1]); cprint("        ███████████            ",colors[0]);cprint("│", colors[1]); cprint(" Vader " + charfix(VADER::API::VERSION, 8), colors[0]);
 		cprint("                             ║", colors[1], true);
@@ -425,7 +414,7 @@ int API::_welcome(std::vector<std::string> args) {
 		error("Something went wrong passing the colors to the command");
 		return EXIT_FAILURE;
 	}
-	int arg2[5] = { stoi(args[1]), stoi(args[2]), stoi(args[3]), stoi(args[4]) };
+	std::array<int, 4> arg2 = { stoi(args[1]), stoi(args[2]), stoi(args[3]), stoi(args[4]) };
 	return API::welcome(arg2);
 }
 
@@ -476,21 +465,21 @@ int API::info(std::vector<std::string> args) {
 			bc = green;
 			c = black;
 		}
+
 		ANSI::background(bc);
 		ANSI::foreground(c);
-		printf("Memory Load: %lu%%\n", memLoad);
+		printf("%s: %lu%%\n", charfix("% Used", 8).c_str(), memLoad);
 		ANSI::reset();
-		printf("Total Ram: %.2f GiB\n", totalRam);
-		printf("Free Ram: %.2f GiB\n", freeRam);
+		printf("%s: %.2f GiB\n", charfix("Total Ram", 16).c_str(), totalRam);
+		printf("%s: %.2f GiB\n", charfix("Free ram", 16).c_str(), freeRam);
 		if (usedRam < 1) {
 			usedRam *= 1024;
-			printf("Used Ram: %.0f MiB\n", usedRam);
+			printf("%s: %.0f Mib\n", charfix("Used Ram", 16).c_str(), usedRam);
 		} else {
-			printf("Used Ram: %.2f GiB\n", usedRam);
+			printf("%s: %.2f GiB\n", charfix("Used Ram", 16).c_str(), usedRam);
 		}
-		printf("Total Virtual Memory: %.2f TiB\n", totalVirtual);
-		printf("Free Virtual Memory: %.2f TiB\n", freeVirtual);
-
+		printf("%s: %.0f TiB\n", charfix("Total Virtual Mem", 24).c_str(), totalVirtual);
+		printf("%s: %.0f TiB\n", charfix("Free Virtual Mem", 24).c_str(), freeVirtual);
 #elif defined __unix__
 		float totalRam, freeRam, usedRam, cached, bufferRam, totalSwap, freeSwap, memLoad;
 		totalRam = get_mem_total() / 1048576.f;
@@ -517,27 +506,83 @@ int API::info(std::vector<std::string> args) {
 		}
 		ANSI::background(bc);
 		ANSI::foreground(c);
-		printf("Memory Load: %.0f%%\n", memLoad);
+		printf("%s: %.0f%%\n", charfix("% Used", 8), memLoad);
 		ANSI::reset();
-		printf("Total Ram: %.2f GiB\n", totalRam);
-		printf("Free Ram: %.2f GiB\n", freeRam);
+		printf("%s: %.2f GiB\n", charfix("Total Ram", 16), totalRam);
+		printf("%s: %.2f GiB\n", charfix("Free ram", 16), freeRam);
 		if (usedRam < 1) {
 			usedRam *= 1024;
-			printf("Used Ram: %.0f MiB\n", usedRam);
+			printf("%s: %.0f Mib\n", charfix("Used Ram", 16), usedRam);
 		} else {
-			printf("Used Ram: %.2f GiB\n", usedRam);
+			printf("%s: %.2f GiB\n", charfix("Used Ram", 16), usedRam);
 		}
-		printf("Buffer Mem: %.0f MiB\n", bufferRam);
-		printf("Cached Mem: %.0f MiB\n", cached);
-		printf("Total Swap Mem: %.0f GiB\n", totalSwap);
-		printf("Free Swap Mem: %.0f GiB\n", freeSwap);
+		printf("%s: %.0f MiB\n", charfix("Buffer Mem:", 16), bufferRam);
+		printf("%s: %.0f MiB\n", charfix("Cached Mem", 16), cached);
+		printf("%s: %.0f MiB\n", charfix("Total Swap Mem", 16), totalSwap);
+		printf("%s: %.0f MiB\n", charfix("Free Swap Mem", 16), freeSwap);
 #endif
 		return EXIT_SUCCESS;
 	} else if (args[1] == "cpu") {
 #ifdef _WIN32
 
 #elif defined __unix__
-
+		typedef struct { std::string data[7]; } thread;
+		typedef struct { std::vector<thread> data; } threads;
+		//cores, siblings, cache, cpuMHZ, cpu_name, cpu_brand, id;
+		threads _threads;
+		thread temp = { { "", "", "", "", "", "", "" } };
+		std::ifstream cpuinfo("/proc/cpuinfo");
+		std::string line;
+		int args = 0;
+		while (std::getline(cpuinfo, line, '\n')) {
+			std::string name = "", val = "";
+			std::stringstream x(line);
+			for (size_t i = 0; i < 2; i++) {
+				if (i == 0) {
+					getline(x, name, ':');
+					for (int i = 0; i < name.size(); i++) {
+						if (name[i] == '\t') name.erase(i);
+					}
+				}
+				else {
+					std::getline(x, val, '\n');
+					val.erase(0, 1);
+					args++;
+					if (name.find("cpu cores") != std::string::npos) temp.data[0] = val;
+					else if (name.find("siblings") != std::string::npos) temp.data[1] = val;
+					else if (name.find("cache size") != std::string::npos) temp.data[2] = val;
+					else if (name.find("cpu MHz") != std::string::npos) temp.data[3] = val;
+					else if (name.find("model name") != std::string::npos) temp.data[4] = val;
+					else if (name.find("vendor_id") != std::string::npos) temp.data[5] = val;
+					else if (name.find("physical id") != std::string::npos) temp.data[6] = val;
+					else args--;
+					if (args == 7) {
+						_threads.data.push_back(temp);
+						args = 0;
+					}
+				}
+			}
+		}
+		if (cpuinfo.is_open()) cpuinfo.close();
+		std::vector<std::string> printed_cpus;
+		for (size_t i = 0; i < _threads.data.size(); i++) {
+			bool cpu_printed = false;
+			for (size_t j = 0; j < printed_cpus.size(); j++) {
+				if (printed_cpus[j] == _threads.data[i].data[6]) {
+					cpu_printed = true;
+					break;
+				}
+			}
+			if (cpu_printed) continue;
+			else printed_cpus.push_back(_threads.data[i].data[6]);
+			if (i != 0) printf("------------------------");
+			print(charfix("Name", 8) + ": " + _threads.data[i].data[4], true);
+			print(charfix("Brand", 8) + ": " + _threads.data[i].data[5], true);
+			print(charfix("MHz", 8) + ": " + _threads.data[i].data[3], true);
+			print(charfix("Cores", 8) + ": " + _threads.data[i].data[0], true);
+			print(charfix("Threads", 8) + ": " + _threads.data[i].data[1], true);
+			print(charfix("Cache", 8) + ": " + _threads.data[i].data[2], true);
+		}
 #endif
 		return EXIT_SUCCESS;
 	} else {

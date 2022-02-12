@@ -1,3 +1,3 @@
-make && make clean
+make
+make clean
 make install
-vader
